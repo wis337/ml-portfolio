@@ -116,7 +116,7 @@ def save_artifacts(pipe, threshold, cost_fn, cost_fp, features):
 
 
 def main() -> None:
-    df = Path(__file__).parent / "creditcard.csv"   
+    df = pd.read_csv(Path(__file__).parent / "creditcard.csv")   
     # eda(df)
 
     X = df.drop(columns=["Class", "Time"])
@@ -203,7 +203,7 @@ def main() -> None:
     # evaluate("LogReg", LogisticRegression(max_iter=1000))
     # evaluate("LogReg Balanced", LogisticRegression(max_iter=1000, class_weight="balanced"))
     # evaluate("Dummy", DummyClassifier(strategy="stratified"))   
-    # evaluate("LGBM", lgb.LGBMClassifier(n_estimators=1000, learning_rate=0.01, subsample_freq=1, subsample=0.8, colsample_bytree=0.8, reg_lambda=0, num_leaves=28, random_state=42, n_jobs = -1))
+    evaluate("LGBM", lgb.LGBMClassifier(n_estimators=1000, learning_rate=0.01, subsample_freq=1, subsample=0.8, colsample_bytree=0.8, reg_lambda=1, num_leaves=28, random_state=42, n_jobs = -1))
     # evaluate("RF", RandomForestClassifier(n_estimators=500, max_depth=12, min_samples_leaf=10, n_jobs=-1, random_state=42))
 
     threshold_study()
