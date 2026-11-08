@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .DS_Store
+telco-churn/
+fraud-detection/creditcard.csv
+fraud-detection/models/model.joblib
