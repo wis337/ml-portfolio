@@ -1,18 +1,15 @@
 import pandas as pd 
 import matplotlib.pyplot as plt 
-import seaborn as sns
 import numpy as np
 
 from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import average_precision_score, confusion_matrix, classification_report, fbeta_score, recall_score, precision_score
+from sklearn.metrics import average_precision_score, confusion_matrix, recall_score, precision_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import  StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import StratifiedKFold, cross_validate, cross_val_predict
 from sklearn.linear_model import LogisticRegression
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.ensemble import RandomForestClassifier
 import lightgbm as lgb
 
@@ -33,13 +30,6 @@ def eda(df) -> None:
 
     print(df.groupby('Class')['Amount'].describe(percentiles=[0.25, 0.5, 0.75])) 
 
-    # plt.figure()
-    # sns.boxplot(data=df, x="Class", y = "Amount").set(ylim=(0, 300))
-    # plt.show()
-
-    # plt.figure()
-    # sns.boxplot(data=df, x="Class", y = "Time")
-    # plt.show()
 
 def build_preprocessor(numeric_features):
     numeric_transformer = Pipeline(steps=[
@@ -78,31 +68,6 @@ def plot_threshold_metrics(y_true, proba):
         cost = fn * 200 + fp * 2
         costs.append(cost)
         
-    # plt.figure(figsize=(10, 5))
-
-    # plt.plot(thresholds, precisions, label="Precision")
-    # plt.plot(thresholds, recalls, label="Recall")
-
-    # plt.xlabel("Threshold")
-    # plt.ylabel("Score")
-    # plt.title("Precision и Recall в зависимости от Threshold")
-
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
-    
-    # plt.figure(figsize=(10, 5))
-
-    # plt.plot(thresholds, false_positives, label="FP")
-    # plt.plot(thresholds, false_negatives, label="FN")
-
-    # plt.xlabel("Threshold")
-    # plt.ylabel("Количество ошибок")
-    # plt.title("Количество ошибок в зависимости от Threshold")
-
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
     
     plt.figure(figsize=(10, 5))
 
@@ -128,9 +93,9 @@ def find_best_threshold(y_true, proba, cost_fn=100, cost_fp=2):
         cost = fn * cost_fn + fp * cost_fp
         costs.append(cost)
 
-        min_cost = min(costs)
-        best_index = costs.index(min_cost)
-        best_threshold = thresholds[best_index]
+    min_cost = min(costs)
+    best_index = costs.index(min_cost)
+    best_threshold = thresholds[best_index]
 
     print("Лучший threshold:", best_threshold)
     print("Минимальная стоимость:", min_cost)
@@ -151,7 +116,7 @@ def save_artifacts(pipe, threshold, cost_fn, cost_fp, features):
 
 
 def main() -> None:
-    df = pd.read_csv("ml-portfolio/fraud-detection/creditcard.csv")    
+    df = Path(__file__).parent / "creditcard.csv"   
     # eda(df)
 
     X = df.drop(columns=["Class", "Time"])
@@ -174,19 +139,8 @@ def main() -> None:
             pipe = make_pipe(lgb.LGBMClassifier(n_estimators=1000, learning_rate=0.01, subsample_freq=1, subsample=0.8, colsample_bytree=0.8, reg_lambda=0, num_leaves=28, random_state=42, n_jobs = -1))
             skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
             proba_cv = cross_val_predict(pipe, X_train, y_train, cv=skf, method="predict_proba")[:, 1]
-            # thresholds = [0.1, 0.2, 0.3, 0.4, 0.5]
-            # for t in thresholds:
-            #     predictions = (proba_cv >= t).astype(int)
-            #     tn, fp, fn, tp = confusion_matrix(y_train, predictions).ravel()
-            #     precision = precision_score(y_train, predictions, zero_division=0)
-            #     recall = recall_score(y_train, predictions, zero_division=0)
-            #     print(f"\nThreshold: {t}")
-            #     print(f"TP: {tp}, FP: {fp}")
-            #     print(f"TN: {tn}, FN: {fn}")
-            #     print(f"Precision: {precision:.4f}")
-            #     print(f"Recall: {recall:.4f}")
-                
-            # plot_threshold_metrics(y_train, proba_cv)
+
+            
             threshold = find_best_threshold(y_train, proba_cv, cost_fn=cost_fn, cost_fp=cost_fp)
             
             
@@ -203,7 +157,7 @@ def main() -> None:
 
             precision = precision_score(y_test, pred_default)
             recall = recall_score(y_test, pred_default)
-            cost = fn * 500 + fp * 2
+            cost = fn * cost_fn + cost_fp * 2
 
             print("Результаты при threshold = 0.5")
             print("TP:", tp, "FP:", fp)
@@ -237,12 +191,6 @@ def main() -> None:
             print("AVG_Prec: ", avg_prec)
             save_artifacts(pipe, threshold, cost_fn, cost_fp, numeric_features)
             
-            
-            import json
-            missed = X_test[(y_test == 1) & (proba_test < threshold)]
-            print(len(missed))
-            print(json.dumps({"features": missed.iloc[0].to_dict()}))
-            print(proba_test[(y_test == 1).to_numpy() & (proba_test < threshold)][0])
             
             
     def evaluate(name, clf):

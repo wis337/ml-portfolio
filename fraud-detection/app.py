@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 import joblib
 from pydantic import BaseModel
-import uvicorn
 import pandas as pd
 
 
@@ -77,5 +76,3 @@ def predict(request: PredictRequest):
         "is_fraud": score >= threshold,
         "applied_threshold": threshold,
     }
-
-#cd ml-portfolio/fraud-detection
