@@ -7,7 +7,6 @@
 | [fraud-detection](fraud-detection/)       | Классификация, сильный дисбаланс классов | Baseline, логистическая регрессия, Random Forest, LightGBM, StratifiedKFold, Average Precision, подбор порога по стоимости ошибок, FastAPI-сервис. На тесте AP 0,88, recall 0,89 |
 | [california-housing](california-housing/) | Регрессия                                | EDA, baseline, Random Forest, кросс-валидация, GridSearchCV, диагностика переобучения                                                                                            |
 | [titanic](titanic/)                       | Классификация                            | Pipeline + ColumnTransformer, OneHotEncoder, метрики классификации, Random Forest и градиентный бустинг, feature engineering                                                     |
-| [telco-churn](telco-churn/)               | Классификация                            | TODO: кратко, что внутри                                                                                                                                                         |
 
 ## Стек
 
